@@ -1,5 +1,17 @@
 // NOTE: You need to copy  ControlP5 into your local Processing>libraries folder
 // I put it in our Google Drive
+
+
+/*
+  Things left to do:
+  1) Parsing of data (maybe into CSV format and using Lingpipe?) and populating g_emails (see required attributes in code) 
+  2) Time Slider to set start time (year, month, day)
+  3) Adapt code for Month View and Day View
+  4) Color control
+  5) Bugs
+*/
+import controlP5.*; // If this doesn't compile, read above.
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -15,6 +27,10 @@ HashMap g_balls;
 ArrayList<Email> g_emails;
 ArrayList<Email> g_newEmails;
 Ball g_subMenuBall;
+
+ControlP5 cp5; // If this doesn't compile, scroll up and read instructions
+Textarea g_submenu;
+
 
 int g_yearStart, g_monthStart, g_dayStart, curEmailPtr; // points to current email in arraylist for efficiency
 
@@ -64,14 +80,27 @@ void setup() {
   // Do we want to update info twice a second?
   // We should update animation even if we're not updating info
   
-  backImg = loadImage("back.png");
-  backImgOn = loadImage("back_on.png");
-  forwardImg = loadImage("forward.png");
-  forwardImgOn= loadImage("forward_on.png");
+  //backImg = loadImage("back.png");
+  //backImgOn = loadImage("back_on.png");
+  //forwardImg = loadImage("forward.png");
+  //forwardImgOn= loadImage("forward_on.png");
   playImg = loadImage("play.png");
   pauseImg = loadImage("pause.png");
   
   g_font = createFont("Arial",16,true);
+  
+  cp5 = new ControlP5(this);
+  g_submenu = cp5.addTextarea("txt")
+                  .setPosition(770,120)
+                  .setSize(360,560)
+                  .setFont(createFont("arial",12))
+                  .setLineHeight(14)
+                  .setColor(color(#00EE00))
+                  .setColorBackground(color(0))
+                  .setColorForeground(color(255,100));
+                  ;
+  g_submenu.setText("");
+                    
   
    g_yearStart = 2012;
    g_monthStart = 1 ;
@@ -597,13 +626,13 @@ void updateSubMenu()
    // Show: Each email (Sender, Date, Subject, Body)
    String text = g_subMenuBall.getEmailThread();
    
-    fill(#00EE00);
-    textFont(g_font, 12);
-    textAlign(LEFT);
+    //fill(#00EE00);
+    //textFont(g_font, 12);
+    //textAlign(LEFT);
     // TODO: need to restrict width of text and do overflow
     // TODO: Bug: is Ball always adding duplicate Emails? // YES, need to fix duplicate addemail to ball
-    text(text, 770,120, 360, 560);
-   
+    //text(text, 770,120, 360, 560);
+    g_submenu.setText(text);
 }
 
 // Updates any aninimation that is running
@@ -856,7 +885,7 @@ class Ball
          result += "Keywords: " + e.getKeyword() + "\n";
          result += "Subject: " + e.getSubject() + "\n";
          result +=  e.getBody() + "\n";
-         result += "------------------------------------------------------------------------------------------\n";
+         result += "------------------------------------------------------------------------------------\n";
      }
      return result;
   }
