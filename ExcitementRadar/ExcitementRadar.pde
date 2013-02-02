@@ -7,8 +7,9 @@
   1) Parsing of data (maybe into CSV format and using Lingpipe?) and populating g_emails (see required attributes in code) 
   2) Time Slider to set start time (year, month, day)
   3) Adapt code for Month View and Day View
-  4) Color control
-  5) Bugs
+  4) Add excitement meter, and other stats on the keyword?
+  5) Color control
+  6) Bugs
 */
 import controlP5.*; // If this doesn't compile, read above.
 
@@ -629,8 +630,7 @@ void updateSubMenu()
     //fill(#00EE00);
     //textFont(g_font, 12);
     //textAlign(LEFT);
-    // TODO: need to restrict width of text and do overflow
-    // TODO: Bug: is Ball always adding duplicate Emails? // YES, need to fix duplicate addemail to ball
+    
     //text(text, 770,120, 360, 560);
     g_submenu.setText(text);
 }
