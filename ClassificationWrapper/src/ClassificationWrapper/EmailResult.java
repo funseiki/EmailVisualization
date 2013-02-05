@@ -3,30 +3,40 @@ package ClassificationWrapper;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.MimeConfig;
 
+import com.aliasi.chunk.Chunk;
+import com.aliasi.chunk.Chunking;
 import com.aliasi.classify.Classification;
 import com.aliasi.classify.Classified;
 import com.aliasi.classify.ConfusionMatrix;
 import com.aliasi.classify.JointClassification;
 import com.aliasi.classify.JointClassifier;
 import com.aliasi.classify.JointClassifierEvaluator;
+import com.aliasi.sentences.MedlineSentenceModel;
+import com.aliasi.sentences.SentenceChunker;
+import com.aliasi.sentences.SentenceModel;
+import com.aliasi.tokenizer.IndoEuropeanTokenizerFactory;
+import com.aliasi.tokenizer.TokenizerFactory;
 import com.aliasi.util.AbstractExternalizable;
 import com.aliasi.util.Files;
 
 public class EmailResult
-{	
-	// Do this so we can package as a runnable .jar
-	public static void main(String[] args)
-	{
-		// Will only be used to debug, the below line should be commented in production code
-		//EmailResult r = new EmailResult("<Insert test email here>");
-	}
+{
+	
+	// These are Factory/utility objects, so they can be static
+	static TokenizerFactory tokenizerFactory = IndoEuropeanTokenizerFactory.INSTANCE;
+	static SentenceModel sentenceModel = new MedlineSentenceModel();
+	static SentenceChunker sentenceChunker = new SentenceChunker(tokenizerFactory, sentenceModel);
 	
 	EmailContentHandler handler;
 	File email;
+	String emailBody = "";
+	int excitementLevel = 0;
 	
 	public EmailResult(String filePath) 
 	{
@@ -48,6 +58,72 @@ public class EmailResult
 			System.out.println("Exception while parsing: " + e.toString());
 		}
 		// Handler is now ready to be queried
+		System.out.println("********Getting Sentences***********");
+		String body = handler.getBody();
+		AssignPoints(body);
+	}
+	
+	private void AssignPoints(String input)
+	{
+		Chunking chunking = sentenceChunker.chunk(input.toCharArray(),0,input.length());
+		Set<Chunk> sentences = chunking.chunkSet();
+		if(sentences.size() < 1)
+		{
+			System.out.println("No sentences found");
+			return;
+		}
+		String slice = chunking.charSequence().toString();
+		int i = 1;
+		for(Iterator<Chunk> it = sentences.iterator(); it.hasNext();)
+		{
+			Chunk sentence = it.next();
+			
+		    int start = sentence.start();
+		    int end = sentence.end();
+		    //System.out.println("Sentence " + (i++) + ":");
+		    //System.out.println(slice.substring(start,end));
+		    String current = slice.substring(start, end);
+		    
+		    // Here we make sure we're not including an old message
+		    String[] messageSplit = current.split("-----Original Message-----");
+		    current = messageSplit[0];
+	    	emailBody += current;
+	    	System.out.println(current);
+	    	excitementLevel += checkForExcitement(current);
+		    if(messageSplit.length > 1)	// There was an older message included
+		    {
+		    	break;
+		    }
+		}
+
+		excitementLevel += checkForExcitement(getSubject());	// Also check the subject line
+		
+    	System.out.println("Current excitement level: " + excitementLevel);
+	}
+	
+	private int checkForExcitement(String sentence)
+	{
+		int ret = 0;
+		if(sentence.contains("!"))
+		{
+			ret++;
+		}
+		String[] caps= sentence.split("\\b[A-Z]{3,}\\b");
+		if(caps.length > 1)
+		{
+			//System.out.println("Got " + caps.length + " caps");
+			ret++;	// 1 point per sentence, regardless of how many caps
+		}
+		else
+		{
+			//System.out.println("No caps found");
+		}
+		return ret;
+	}
+	
+	public int getExcitementLevel()
+	{
+		return excitementLevel;
 	}
 	
 	public String getBody()
@@ -78,6 +154,13 @@ public class EmailResult
 	public Date getDate()
 	{
 		return handler.getDate();
+	}
+	
+	// Do this so we can package as a runnable .jar
+	public static void main(String[] args)
+	{
+		// Will only be used to debug, the below line should be commented in production code
+		//EmailResult r = new EmailResult("<Test Email Goes Here>");
 	}
 
 }
