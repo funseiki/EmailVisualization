@@ -9,7 +9,9 @@ Used as a project for the Spring 2013 CS 467 class at the University of Illinois
 
 ToDo:
 1) Split up EmailResult's getDate method into smaller getMonth(), getYear(), getDay(), getTime() [should return integers] 
+
 2) Have a timeline vs total excitement level at the bottom 
+
 3) Zoom into a circle to show email detail
 
 How to export/use java library:
