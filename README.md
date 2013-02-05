@@ -17,10 +17,10 @@ ToDo:
 
 How to export/use java library:
 - Open Eclipse with the ClassificationWrapper project
-- Write click the Project in the package explorer
+- Right click the Project in the package explorer
 	- >Export
 	- >Runnable JAR file
-	- >Extract required libraries into generated JAY
+	- >Extract required libraries into generated JAR
 	- >Save to Processing (usually located in MyDocuments)/libraries/classifyWrapper/library/classifyWrapper.jar
 - To use, re-open the Processing GUI. At the top insert: "import ClassificationWrapper.*;
 
