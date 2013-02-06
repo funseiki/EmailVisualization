@@ -495,14 +495,40 @@ void updateDefaultChanges()
     
    // Update main view
    // Update all balls
-   
+  // Cools down slower for monthly and daily views
+  boolean doUpdate = true;
+   switch(curView)
+   {
+      case 0:// day // updates every day
+       if (views[0].getCurHour() != 0)
+       {
+           doUpdate = false;
+       }
+       break;
+      
+      case 1: // month : update twice a month
+      if (!(views[1].getCurDay() == 1 || views[1].getCurDay() == 15))
+       {
+           doUpdate = false;
+       }
+        break;
+      case 2: // year: updates every month
+      
+      
+        break;
+       
+   }
+   if(doUpdate)
+   {
     Iterator i = g_balls.entrySet().iterator();  // Get an iterator
     while (i.hasNext()) 
     {
       Map.Entry me = (Map.Entry)i.next();
       Ball b = (Ball) me.getValue();
       b.update();  
-    }
+    } 
+   }
+    
     
      
 }
@@ -610,7 +636,7 @@ ArrayList getNewEmails()
    // Assume we dont have 1200 emails each time period
    while(failsafe < 1200)
    {
-     println("curEmailPtr: " + curEmailPtr + " g_emails: " + g_emails.size());
+     //println("curEmailPtr: " + curEmailPtr + " g_emails: " + g_emails.size());
       if(curEmailPtr >= g_emails.size())
         return result;
         
@@ -714,9 +740,9 @@ void updateSliderTitle(boolean doAll)
            {
              
               Email e = g_emails.get(curEmailPtr);
-              println("year: " + e.getYear() + " year start = " + g_yearStart);
-              println("month: " + e.getMonth() + " month start = " + g_monthStart);
-              println("day: " + e.getDay() + "day start = " + g_dayStart);
+              //println("year: " + e.getYear() + " year start = " + g_yearStart);
+              //println("month: " + e.getMonth() + " month start = " + g_monthStart);
+              //println("day: " + e.getDay() + "day start = " + g_dayStart);
              if (e.getYear() < g_yearStart)
               {
                  curEmailPtr++;
@@ -740,7 +766,7 @@ void updateSliderTitle(boolean doAll)
 }
 void reset()
 {
-  println("ball reset");
+  //println("ball reset");
   isPaused = true;
   isForward = true;
   isSubmenuOpen = true;
