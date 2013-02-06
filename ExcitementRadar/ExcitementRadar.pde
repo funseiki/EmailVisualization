@@ -16,11 +16,13 @@
   Slider, and graph
 */
 import controlP5.*; // If this doesn't compile, read above.
-
+import ClassificationWrapper.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Date ;
+import java.io.File;
 
 
 // Set the palette
@@ -256,6 +258,7 @@ void setup() {
   g_emails = new ArrayList();
   g_newEmails = new ArrayList<Email>();
   g_subMenuBall = null;
+  loadEmails();
   // Load data into g_emails (assumed already sorted by time)
   // CSV: thread_id, year, month, day, hour, excitement_level, sender, subject, body, datetime, keyword;
    // Hardcode for now 
@@ -354,6 +357,42 @@ void setup() {
        }
   cp5.getController("Time").setValueLabel(slider_title); 
   
+}
+void loadEmails()
+{
+ //println(sketchPath(""));
+ // hardcode for now
+ File directory = new File(sketchPath("") + "/inbox/");  
+File[] files = directory.listFiles();  
+  //println("files: " + files.length);
+  // why directory.listFiles can only hold up to 1253 lenght?
+for (int index = 0; index < files.length; index++)  
+{  
+   //Print out the name of files in the directory  
+   //System.out.println(files[index].toString());  
+    println("laoding emails: " + index); 
+    try{
+      
+   EmailResult emailResult = new EmailResult(files[index].toString());
+   if(emailResult == null)
+     return;
+     
+   String[] from = emailResult.getFrom();  // returns an array of senders
+   String[] to = emailResult.getTo();
+   String subject = emailResult.getSubject();
+   String body = emailResult.getBody();
+   Boolean isReply = emailResult.IsReply();
+   int excitementLevel = emailResult.getExcitementLevel();
+   Date d = emailResult.getDate();
+   
+    }
+    catch(Exception e)
+    {
+      ;
+    }
+  
+} 
+
 }
 void recreateSlider()
 {
