@@ -86,14 +86,24 @@ public class EmailResult
 		    
 		    // Here we make sure we're not including an old message
 		    String[] messageSplit = current.split("-----Original Message-----");
+		    if(messageSplit.length == 0)
+		    {
+		    	break;
+		    }
+		    else if(messageSplit[0].length() == 0)
+		    {
+		    	break;
+		    }
 		    current = messageSplit[0];
 	    	emailBody += current;
+	    	System.out.println("Current chunk: " + i);
 	    	System.out.println(current);
 	    	excitementLevel += checkForExcitement(current);
 		    if(messageSplit.length > 1)	// There was an older message included
 		    {
 		    	break;
 		    }
+		    i++;
 		}
 
 		excitementLevel += checkForExcitement(getSubject());	// Also check the subject line
@@ -160,7 +170,7 @@ public class EmailResult
 	public static void main(String[] args)
 	{
 		// Will only be used to debug, the below line should be commented in production code
-		//EmailResult r = new EmailResult("<Test Email Goes Here>");
+		//EmailResult r = new EmailResult("<Email here>");
 	}
 
 }
