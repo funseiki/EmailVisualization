@@ -166,6 +166,29 @@ public class EmailResult
 		return handler.getDate();
 	}
 	
+	public int getDay()
+	{
+		return handler.getDate().getDate();
+	}
+	
+	public int getHour()
+	{
+		return handler.getDate().getHours() + 1;
+	}
+	
+	public int getMonth()
+	{
+		return handler.getDate().getMonth() + 1;
+	}
+	
+	public String getDateTime()
+	{
+		String s ="";
+		Date d = handler.getDate();
+		s += (getHour() % 12) + ":" + d.getMinutes() + ":" + d.getSeconds();
+		return s;
+	}
+	
 	// Do this so we can package as a runnable .jar
 	public static void main(String[] args)
 	{
