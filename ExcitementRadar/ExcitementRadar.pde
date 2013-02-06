@@ -22,6 +22,39 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+
+// Set the palette
+// Background
+int backgroundColor;
+
+// Border
+int borderColor;
+
+// Text
+int textColor;
+
+// Radar
+int radarBackground;
+
+// Email Info
+int emailBackground;
+
+void setPalette()
+{
+  // Background
+ backgroundColor = color(200);
+
+// Border
+ borderColor = color(#00EE00);
+
+// Radar
+ radarBackground = backgroundColor;
+
+// Email Info
+ emailBackground = backgroundColor;
+}
+
+
 // Program Variables
 View[] views; //0: daily, 1: monthly, 2: yearly
 int curView; // ptr to current view (0: daily, 1: monthly, 2: yearly)
@@ -55,7 +88,9 @@ int back_btnx, back_btny;
 int forward_btnx, forward_btny;
 
 void setup() {
-  size(1300, 800);     
+  size(1300, 800);
+  setPalette();
+  
   // Configure State Defaults
   isPaused = true;
   isForward = true;
@@ -84,10 +119,6 @@ void setup() {
   // Do we want to update info twice a second?
   // We should update animation even if we're not updating info
   
-  //backImg = loadImage("back.png");
-  //backImgOn = loadImage("back_on.png");
-  //forwardImg = loadImage("forward.png");
-  //forwardImgOn= loadImage("forward_on.png");
   playImg = loadImage("play.png");
   pauseImg = loadImage("pause.png");
   
@@ -99,13 +130,13 @@ void setup() {
                   .setSize(360,560)
                   .setFont(createFont("arial",12))
                   .setLineHeight(14)
-                  .setColor(color(#00EE00))
-                  .setColorBackground(color(0))
+                  .setColor(color(borderColor))
+                  .setColorBackground(color(emailBackground))
                   .setColorForeground(color(255,100));
                   ;
   g_submenu.setText("");
                     
-    CallbackListener speedCB = new CallbackListener() {
+  CallbackListener speedCB = new CallbackListener() {
     public void controlEvent(CallbackEvent theEvent) {
       switch(theEvent.getAction()) {
         case(ControlP5.ACTION_RELEASED):
@@ -458,27 +489,27 @@ void draw() {
 
 void setBackground()
 {
-  background(0);
+  background(backgroundColor);
   // Draw main view
   
   
   // radar
-  stroke(#00EE00);
+  stroke(borderColor);
   strokeWeight(3);
-  fill(0);
+  fill(radarBackground);
   ellipse(dotx,doty,600,600);
  
  
   // Create Sub menu Frame
-  stroke(#00EE00);
+  stroke(borderColor);
   strokeWeight(3);
-  fill(0);
+  fill(emailBackground);
   rect(sub_rectx,sub_recty,400,600, 7);
   
   // Draw visualization title
-  fill(#00EE00);
+  fill(borderColor);
   textFont(g_font, 20);
- textAlign(LEFT);
+  textAlign(LEFT);
   text("Excitement Radar", 30,775); 
   
   // Any other static items? Like static buttons (appearance doesn't change) go here.
@@ -1288,7 +1319,7 @@ void updateAnimation()
 
 void setTitle(String text)
 {
-  fill(#00EE00);
+  fill(borderColor);
   textFont(g_font, 32);
   textAlign(CENTER, BOTTOM);
   text(text, 650,60);      
