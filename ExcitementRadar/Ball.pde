@@ -62,7 +62,7 @@ class Ball
         fill(0, 0, 255); // Change to blue if selected
         return;
     }
-    colorMode(HSB, 100);
+    colorMode(HSB, 360, 100, 100);
     switch(this.heat_level)
     {
        case 1:
