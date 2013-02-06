@@ -62,41 +62,54 @@ class Ball
         fill(0, 0, 255); // Change to blue if selected
         return;
     }
+    colorMode(HSB, 100);
     switch(this.heat_level)
     {
        case 1:
-          fill(255, 245, 0);          
+       fill(39, 10, 100);
+       //   fill(255, 245, 0);          
           break;
        case 2:
-          fill(255, 225, 0);      
+       fill(39, 20, 100);
+       //   fill(255, 225, 0);      
           break;
        case 3:
-          fill(255, 205, 0);      
+       fill(39, 30, 100);
+       //   fill(255, 205, 0);      
           break;
        case 4:
-          fill(255, 185, 0);      
+       fill(39, 40, 100);
+       //   fill(255, 185, 0);      
           break;
        case 5:
-          fill(255, 165, 0);
+       fill(39, 50, 100);
+       //   fill(255, 165, 0);
           break;
        case 6:
-          fill(255, 145, 0);
+          
+           fill(39, 60, 100);
+         // fill(255, 145, 0);
           break;
        case 7:
-          fill(255, 125, 0);
+       fill(39, 70, 100);
+       //   fill(255, 125, 0);
           break;
        case 8:
-          fill(255, 105, 0);      
+       fill(39, 80, 100);
+       //   fill(255, 105, 0);      
           break;
        case 9:
-          fill(255, 125, 0);      
+       fill(39, 90, 100);
+       //   fill(255, 125, 0);      
           break;
        case 10:
-          fill(255, 115, 0);      
+       fill(39, 100, 100);
+       //   fill(255, 115, 0);      
           break;   
        default:
            ;
     }
+    colorMode(RGB, 255);
      
   }
   String getEmailThread()

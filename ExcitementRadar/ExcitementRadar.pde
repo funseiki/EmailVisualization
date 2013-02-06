@@ -10,6 +10,10 @@
   4) Add excitement meter, and other stats on the keyword?
   5) Color control
   6) Bugs
+  
+  Speed control
+  Backward?
+  Slider, and graph
 */
 import controlP5.*; // If this doesn't compile, read above.
 
@@ -33,14 +37,15 @@ ControlP5 cp5; // If this doesn't compile, scroll up and read instructions
 Textarea g_submenu;
 
 
-int g_yearStart, g_monthStart, g_dayStart, curEmailPtr; // points to current email in arraylist for efficiency
+int g_yearStart, g_monthStart, g_dayStart, g_hourStart, curEmailPtr; // points to current email in arraylist for efficiency
 
 // State Configurations
 boolean isPaused; // State control (whether it's paused or not)
-//boolean isForward; // State control (whether the time moves forward or backwards) // Let's not implement this cos it's troublesome
+boolean isForward; // State control (whether the time moves forward or backwards) // Let's not implement this cos it's troublesome
 boolean isSubmenuOpen;
 
-
+int updateSpeed; // the smaller, the faster, and must be a factor of 60 (the frame rate). 5,10, 15, 30
+int pending_updateSpeed; // if not 0, then it'll update updateSpeed on the next revolution
 // XY Configurations
 int dotx,doty, radius; // Center dot for radar
 int sub_rectx; // Frame of sub menu
@@ -52,8 +57,8 @@ int forward_btnx, forward_btny;
 void setup() {
   size(1300, 800);     
   // Configure State Defaults
-  isPaused = false;
-  //isForward = true;
+  isPaused = true;
+  isForward = true;
   isSubmenuOpen = true;
   
   angle_count = 0;
@@ -71,12 +76,10 @@ void setup() {
   forward_btny = play_btny;  
   
   // Initialize Variables
-  views = new View[3];
-  views[0] = new View("Daily View", 24); 
-  views[1] = new View("Monthly View", 30); // month may be tricky due to uneven number of days 
-  views[2] = new View("Yearly View", 12);
-  curView = 2; // Default is yearly view.
+  
   frameRate(60);
+  updateSpeed = 15; // default
+  pending_updateSpeed = 0;
   // Default frame rate is 60;
   // Do we want to update info twice a second?
   // We should update animation even if we're not updating info
@@ -102,10 +105,121 @@ void setup() {
                   ;
   g_submenu.setText("");
                     
+    CallbackListener speedCB = new CallbackListener() {
+    public void controlEvent(CallbackEvent theEvent) {
+      switch(theEvent.getAction()) {
+        case(ControlP5.ACTION_RELEASED):
+        case(ControlP5.ACTION_RELEASEDOUTSIDE):
+        //println("Released");
+        int v = (int) cp5.getController("Speed").getValue();
+        switch(v)
+        {
+           case 1:
+             pending_updateSpeed = 60;
+             break;
+           case 2:
+             pending_updateSpeed = 30;
+             break;
+           case 3:
+             pending_updateSpeed = 15;
+             break;
+           case 4:
+           
+             pending_updateSpeed = 5;
+             break;
+           case 5: 
+            pending_updateSpeed = 2;
+            break; 
+        }
+        break;
+      }
+    }
+  };
+   // add a vertical slider. meter:speed -- 5: 2, 4: 5, 3: 15, 2: 30, 1: 60 
+   cp5.addSlider("Speed")
+     .setPosition(50,320)
+     .setSize(20,150)
+     .setRange(1,5)
+     .setValue(3)
+     .setNumberOfTickMarks(5)
+     .addCallback(speedCB)
+     ;
   
-   g_yearStart = 2012;
-   g_monthStart = 1 ;
-   g_dayStart = 1;
+  CallbackListener dailyViewCB = new CallbackListener() {
+    public void controlEvent(CallbackEvent theEvent) {
+      switch(theEvent.getAction()) {
+        case(ControlP5.ACTION_RELEASED):
+        case(ControlP5.ACTION_RELEASEDOUTSIDE):
+       curView = 0;
+      cp5.getController("Daily_View").setColorCaptionLabel(#00EE00);
+      cp5.getController("Monthly_View").setColorCaptionLabel(#f5f5f5);
+    cp5.getController("Yearly_View").setColorCaptionLabel(#f5f5f5);  
+    recreateSlider();
+        break;
+      }
+    }
+  };
+   CallbackListener monthlyViewCB = new CallbackListener() {
+    public void controlEvent(CallbackEvent theEvent) {
+      switch(theEvent.getAction()) {
+        case(ControlP5.ACTION_RELEASED):
+        case(ControlP5.ACTION_RELEASEDOUTSIDE):
+       curView = 1;
+      cp5.getController("Daily_View").setColorCaptionLabel(#f5f5f5);
+      cp5.getController("Monthly_View").setColorCaptionLabel(#00EE00);
+    cp5.getController("Yearly_View").setColorCaptionLabel(#f5f5f5);
+    // update slider range 
+    recreateSlider();
+    
+        break;
+      }
+    }
+  };
+   CallbackListener yearlyViewCB = new CallbackListener() {
+    public void controlEvent(CallbackEvent theEvent) {
+      switch(theEvent.getAction()) {
+        case(ControlP5.ACTION_RELEASED):
+        case(ControlP5.ACTION_RELEASEDOUTSIDE):
+       curView = 2;
+      cp5.getController("Daily_View").setColorCaptionLabel(#f5f5f5);
+      cp5.getController("Monthly_View").setColorCaptionLabel(#f5f5f5);
+    cp5.getController("Yearly_View").setColorCaptionLabel(#00EE00); 
+   recreateSlider();
+        break;
+      }
+    }
+  };
+  // Add view buttons
+  cp5.addButton("Daily_View")
+     .setValue(0)
+     .setPosition(860,765)
+     .setSize(60,23)
+     .setCaptionLabel("Daily View")
+     .addCallback(dailyViewCB)
+     ;
+      
+  cp5.addButton("Monthly_View")
+     .setValue(0)
+     .setPosition(925,765)
+     .setSize(70,23)
+     .setCaptionLabel("Monthly View")
+     .addCallback(monthlyViewCB)
+     ;
+     cp5.getController("Monthly_View").setColorCaptionLabel(#00EE00);
+  cp5.addButton("Yearly_View")
+     .setValue(0)
+     .setPosition(1000,765)
+     .setSize(70,23)
+     .setCaptionLabel("Yearly View")
+     .addCallback(yearlyViewCB)
+     ;
+  // reposition the Label for controller 'slider'
+  //cp5.getController("slider1").getValueLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingX(0);
+  //cp5.getController("slider").getCaptionLabel().align(ControlP5.RIGHT, ControlP5.BOTTOM_OUTSIDE).setPaddingX(0);
+  
+
+  
+   
    curEmailPtr = 0;
   g_balls = new HashMap();
   g_emails = new ArrayList();
@@ -114,13 +228,13 @@ void setup() {
   // Load data into g_emails (assumed already sorted by time)
   // CSV: thread_id, year, month, day, hour, excitement_level, sender, subject, body, datetime, keyword;
    // Hardcode for now 
-   Email e1 = new Email(1, 2012, 1, 2, 3, 2, "Mary", "1 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
+   Email e1 = new Email(1, 2012, 1, 2, 3, 0, "Mary", "1 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
    g_emails.add(e1);
-   Email e2 = new Email(2, 2012, 1, 2, 3, 2, "Mary", "2 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
+   Email e2 = new Email(2, 2012, 1, 2, 3, 0, "Mary", "2 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
    g_emails.add(e2);
-   Email e3 = new Email(3, 2012, 4, 2, 3, 2, "Mary", "3 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
+   Email e3 = new Email(3, 2012, 4, 2, 3, 0, "Mary", "3 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
    g_emails.add(e3);
-   Email e4 = new Email(1, 2012, 5, 2, 3, 2, "Mary", "4 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
+   Email e4 = new Email(1, 2012, 5, 2, 3, 0, "Mary", "4 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
    g_emails.add(e4);
    Email e5 = new Email(2, 2012, 6, 2, 3, 2, "Mary", "5 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
    g_emails.add(e5);
@@ -144,9 +258,125 @@ void setup() {
    g_emails.add(e14);
    Email e15 = new Email(1, 2013, 2, 2, 3, 2, "Mary", "15 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
    g_emails.add(e15);
+   
+   g_yearStart = g_emails.get(0).getYear();
+   g_monthStart = g_emails.get(0).getMonth() ;
+   g_dayStart = g_emails.get(0).getDay();
+   g_hourStart = g_emails.get(0).getHour();
+   //int viewType, int currentYear, int currentMonth, int currentDay, int currentHour
+   
+   views = new View[3];
+  views[0] = new View("Daily View", 0, g_yearStart, 1, 1, -1); 
+  views[1] = new View("Monthly View", 1, g_yearStart, 1, 0, 0);  
+  views[2] = new View("Yearly View", 2, g_yearStart, 0, 1, 0);
+  setTotalTimeForViews();
+  curView = 1; // Default is monthly view.
+  
+  
+   CallbackListener timeCB = new CallbackListener() {
+    public void controlEvent(CallbackEvent theEvent) {
+      switch(theEvent.getAction()) {
+        case(ControlP5.ACTION_RELEASED):
+        case(ControlP5.ACTION_RELEASEDOUTSIDE):
+        updateSliderTitle(true);
+        reset();
+        
+        break;
+        case(ControlP5.ACTION_BROADCAST):
+        //println("Released");
+        updateSliderTitle(false);
+   
+        break;
+      }
+    }
+  };
+  cp5.addSlider("Time")
+     .setPosition(750,730)
+     .setWidth(400)
+     .setRange(1, views[curView].getTotalSliderTime()) // values can range from big to small as well
+     .setValue(1)
+     .showTickMarks(false)
+     .setSliderMode(Slider.FLEXIBLE)
+     .addCallback(timeCB)
+     ;
+     cp5.getController("Time").getValueLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingX(0);
+  
+  String slider_title;
+   switch(curView)
+       {
+          case 0: // Day
+            // Time unit for day is hours
+            // Show Year, Month, Day, Hour
+            slider_title = views[curView].getCurDay() + " " + getMonthOfYear(views[curView].getCurMonth()) + ", " + views[curView].getCurYear() ;                     
+            break;
+          
+          case 2: // Year
+            // Show Year, Month 
+            slider_title = ""+views[curView].getCurYear();
+            break;
+          
+          case 1: // Month  
+          default:
+            // Time units for month is days
+            // Show Day, Month, Year      
+            slider_title = getMonthOfYear(views[curView].getCurMonth()) + ", " + views[curView].getCurYear();
+       }
+  cp5.getController("Time").setValueLabel(slider_title); 
+  
 }
-
-
+void recreateSlider()
+{
+  cp5.getController("Time").remove();
+   CallbackListener timeCB = new CallbackListener() {
+    public void controlEvent(CallbackEvent theEvent) {
+      switch(theEvent.getAction()) {
+        case(ControlP5.ACTION_RELEASED):
+        case(ControlP5.ACTION_RELEASEDOUTSIDE):
+        updateSliderTitle(true);
+        reset();
+        
+        break;
+        case(ControlP5.ACTION_BROADCAST):
+        //println("Released");
+        updateSliderTitle(false);
+   
+        break;
+      }
+    }
+  };
+ cp5.addSlider("Time")
+     .setPosition(750,730)
+     .setWidth(400)
+     .setRange(1, views[curView].getTotalSliderTime()) // values can range from big to small as well
+     .setValue(1)
+     .showTickMarks(false)
+     .setSliderMode(Slider.FLEXIBLE)
+     .addCallback(timeCB)
+     ;
+     cp5.getController("Time").getValueLabel().align(ControlP5.LEFT, ControlP5.BOTTOM_OUTSIDE).setPaddingX(0);
+  
+  String slider_title;
+   switch(curView)
+       {
+          case 0: // Day
+            // Time unit for day is hours
+            // Show Year, Month, Day, Hour
+            slider_title = views[curView].getCurDay() + " " + getMonthOfYear(views[curView].getCurMonth()) + ", " + views[curView].getCurYear() ;                     
+            break;
+          
+          case 2: // Year
+            // Show Year, Month 
+            slider_title = ""+views[curView].getCurYear();
+            break;
+          
+          case 1: // Month  
+          default:
+            // Time units for month is days
+            // Show Day, Month, Year      
+            slider_title = getMonthOfYear(views[curView].getCurMonth()) + ", " + views[curView].getCurYear();
+       }
+  cp5.getController("Time").setValueLabel(slider_title);  
+}
 void draw() {
   
   
@@ -184,7 +414,7 @@ void draw() {
   
   // Update only two times per second, ie, if frame is 30 or 60...
   boolean doUpdate;
-  doUpdate = (angle_count % 30) == 0;
+  doUpdate = (angle_count % updateSpeed) == 0;
   
   if(doUpdate)
   {
@@ -259,7 +489,9 @@ void setBackground()
 void updateDefaultChanges()
 {
     // Update time
-    views[curView].updateTime();
+    for (int i = 0; i < views.length; i++)
+      views[i].updateTime();
+    //views[curView].updateTime();
     
    // Update main view
    // Update all balls
@@ -296,10 +528,10 @@ void staggerEmail()
   if(g_newEmails.size() == 0)
     return;
     
-    int curSubFrame = angle_count%30;
+    int curSubFrame = angle_count%updateSpeed;
     // Find total number of new emails
     // Update only total / 30 each time
-    int eachUpdate = g_newEmails.size() / 30;
+    int eachUpdate = g_newEmails.size() / updateSpeed;
     if(eachUpdate == 0)
       eachUpdate = 1;
       // TODO: Note: this stagger will update all remaining at the end, and doesn't stagger the modulus
@@ -313,7 +545,7 @@ void staggerEmail()
      {
        Email e_id = (Email) g_newEmails.get(i);
        int id = e_id.getThreadId();
-       println("adding email: "+ i + " id: "+ id + " Subject: " + e_id.getSubject());
+       //println("adding email: "+ i + " id: "+ id + " Subject: " + e_id.getSubject());
        addEmailToBall((Email) g_newEmails.get(i));
        count++;
      }  
@@ -328,7 +560,7 @@ void staggerEmail()
      {
        Email e_id = (Email) g_newEmails.get(i);
        int id = e_id.getThreadId();
-       println("29: adding email: "+ i + " id: "+ id + " Subject: " + e_id.getSubject());
+       //println("29: adding email: "+ i + " id: "+ id + " Subject: " + e_id.getSubject());
        addEmailToBall((Email) g_newEmails.get(i));
        
      } 
@@ -367,13 +599,8 @@ ArrayList getNewEmails()
 {
    // How to translate current time to months from start?
    // TODO: We'll do for year first
-   ArrayList result = new ArrayList();
-   int time = views[curView].getTime();
-   int this_time = g_yearStart * 12 + time; // TODO: year view only. need to do for other views 
-   //int years_passed = time / 12;
-   //int cur_year = g_yearStart + years_passed;
-   //int cur_month = time % 12 +1; // Jan starts at 1
-   
+   ArrayList result = new ArrayList(); 
+      
    // Get emails from current year and time
    // What's an efficient way to get emails? use curEmailPtr
    // Check if the next email is in this year / month
@@ -383,36 +610,198 @@ ArrayList getNewEmails()
    // Assume we dont have 1200 emails each time period
    while(failsafe < 1200)
    {
+     println("curEmailPtr: " + curEmailPtr + " g_emails: " + g_emails.size());
       if(curEmailPtr >= g_emails.size())
         return result;
         
       Email e = (Email) g_emails.get(curEmailPtr);
-      int e_time = e.getYear() * 12 + e.getMonth();
-      //println("e_time: " + e_time + " time: " + this_time);
-      if(e_time > this_time)
+      if(!getNextEmail(e))
+      {
          return result;
-      if(e_time == this_time)
-     {
-       //println("Adding email");
+      }
+       println("Adding email");
         result.add(e);
         curEmailPtr++;
-     } 
+      
      failsafe++;
    }
    return result;
 }
+boolean getNextEmail(Email e)
+{  
+  //println ("e year: " + e.getYear() + " view: " + views[curView].getCurYear());
+ // println ("e month: " + e.getMonth() + " view: " + views[curView].getCurMonth());
+ // println ("e day: " + e.getDay() + " view: " + views[curView].getCurDay());
+  //println ("e hour: " + e.getHour() + " view: " + views[curView].getCurHour());
+       switch(curView)
+       {
+          case 0: // Day
+            // Time unit for day is hours
+            // Compare Hour (Year, month, day, hour must be same)   
+           if(e.getYear() == views[curView].getCurYear() && 
+           e.getMonth() == views[curView].getCurMonth() &&
+           e.getDay() == views[curView].getCurDay() &&
+           e.getHour() == views[curView].getCurHour())
+           {
+              return true; 
+           }            
+            break;
+          
+          case 2: // Year
+            // Find # of months passed since start 
+            // Year, month must be same
+           if(e.getYear() == views[curView].getCurYear() && 
+           e.getMonth() == views[curView].getCurMonth())
+           {
+              return true; 
+           }
+                 
+            break;
+          
+          case 1: // Month  
+          default:
+            // Time units for month is days
+           // Year, Month, day must be same 
+           if(e.getYear() == views[curView].getCurYear() && 
+           e.getMonth() == views[curView].getCurMonth() &&
+           e.getDay() == views[curView].getCurDay())
+           {
+              return true; 
+           }     
+       }     
+       
+      return false; 
+
+}
+void updateSliderTitle(boolean doAll)
+{
+ int v = (int) cp5.getController("Time").getValue();
+       // Show date in slider value label
+        int[] this_datetime = getSliderDatetime(v);
+        String slider_title;
+        switch(curView)
+       {
+          case 0: // Day
+            // Time unit for day is hours
+            // Show Year, Month, Day, Hour
+            slider_title = this_datetime[0] + " " + getMonthOfYear(this_datetime[1]) + ", " + this_datetime[2] ;          
+            break;
+          
+          case 2: // Year
+            // Show Year, Month 
+            slider_title = ""+this_datetime[2];        
+            break;
+          
+          case 1: // Month  
+          default:
+            // Time units for month is days
+            // Show Day, Month, Year      
+            slider_title = getMonthOfYear(this_datetime[1]) + ", " + this_datetime[2]; 
+       }        
+        cp5.getController("Time").setValueLabel(slider_title); 
+        if(doAll)
+        {
+           g_yearStart = this_datetime[2];
+           g_monthStart = this_datetime[1];
+           g_dayStart = this_datetime[0];
+           g_hourStart = 0;
+           curEmailPtr = 0;
+             
+          views[curView].setCurSliderTime(v);
+          
+           // reset email pointer
+           for(int i  = 0; i < g_emails.size(); i++)
+           {
+             
+              Email e = g_emails.get(curEmailPtr);
+              println("year: " + e.getYear() + " year start = " + g_yearStart);
+              println("month: " + e.getMonth() + " month start = " + g_monthStart);
+              println("day: " + e.getDay() + "day start = " + g_dayStart);
+             if (e.getYear() < g_yearStart)
+              {
+                 curEmailPtr++;
+                 continue;
+              }
+             if (e.getMonth() < g_monthStart)
+              {
+                 curEmailPtr++;
+                 continue;
+              }
+            if (e.getDay() < g_dayStart)
+              {
+                 curEmailPtr++;
+                 continue;
+              }    
+              break;
+           }        
+        }
+  
+   
+}
+void reset()
+{
+  println("ball reset");
+  isPaused = true;
+  isForward = true;
+  isSubmenuOpen = true;
+  
+  angle_count = 0;
+
+   
+  g_balls = new HashMap();
+  g_newEmails = new ArrayList<Email>();
+  g_subMenuBall = null;
+   //int viewType, int currentYear, int currentMonth, int currentDay, int currentHour
+   int curSliderTime0 = views[0].getCurSliderTime();// preserve slider time
+  int curSliderTime1 = views[1].getCurSliderTime();// preserve slider time
+ int curSliderTime2 = views[2].getCurSliderTime();// preserve slider time 
+   views = new View[3];
+  views[0] = new View("Daily View", 0, g_yearStart, g_monthStart, g_dayStart, -1); 
+  views[1] = new View("Monthly View", 1, g_yearStart, g_monthStart, 1, 0);  
+  views[2] = new View("Yearly View", 2, g_yearStart, 0, 1, 0);
+  
+  setTotalTimeForViews();
+  
+  views[0].setCurSliderTime(curSliderTime0);
+  views[1].setCurSliderTime(curSliderTime1);
+  views[2].setCurSliderTime(curSliderTime2);
+}
 
 float getCurrentAngle()
 {
-    int time = views[curView].getTime();
+    int time;// = views[curView].getTime();
     int total_time = views[curView].getUnitsPerRevolution();
     
+    switch(curView)
+   {
+      case 0: // day
+       time =  views[curView].getCurHour();
+       break;
+      case 1:
+     time =  views[curView].getCurDay();
+       break;
+      
+      case 2:
+     time =  views[curView].getCurMonth();
+       break; 
+       default:
+         time =  views[curView].getCurDay();
+   }
+   
     // We update info every 30 frames but animate dial every frame. 
     float angle;
     
     float last_angle = (time % total_time) * TWO_PI / total_time;
-    float angle_diff =  angle_count%30  * TWO_PI / total_time / 30;
+    float angle_diff =  angle_count%updateSpeed  * TWO_PI / total_time / updateSpeed;
    float cur_angle = last_angle + angle_diff;
+   // update the speed right now if angle_diff == 0;
+   if(pending_updateSpeed != 0)
+   {
+     //println("Setting update speed: "+ pending_updateSpeed);
+      updateSpeed = pending_updateSpeed;
+     pending_updateSpeed = 0; 
+   }
+   
   return cur_angle; 
 }
 
@@ -420,9 +809,33 @@ float getCurrentAngle()
 void redrawMainView()
 {
   // Redraw Dial
-   int time = views[curView].getTime();
+   //int time = views[curView].getTime();
     int total_time = views[curView].getUnitsPerRevolution();
+   
    float cur_angle = getCurrentAngle(); 
+   int cur_unit;
+   switch(curView)
+   {
+      case 0: // day
+       cur_unit =  views[curView].getCurHour();
+       if (cur_unit == 0)
+         cur_unit = 1;
+       break;
+      case 1:
+     cur_unit =  views[curView].getCurDay();
+     if (cur_unit == 0)
+       cur_unit = 1;
+       break;
+      
+      case 2:
+     cur_unit =  views[curView].getCurMonth();
+     if (cur_unit == 0)
+       cur_unit = 1;
+       break; 
+       default:
+         cur_unit =  views[curView].getCurDay();
+   }
+   int time = cur_unit;
     /*
     if(isPaused)
     {
@@ -449,8 +862,8 @@ void redrawMainView()
   //line(dotx,doty,dotx + radius*sin(angle), doty -  radius * cos(angle));
    // draw time text at end of dial
    textFont(g_font, 14);
-   
-   text(time % total_time + 1, dotx + (radius+15)*sin(angle), doty -  (radius+15) * cos(angle) );   
+   if(cur_unit>0)
+     text(cur_unit, dotx + (radius+18)*sin(angle), doty -  (radius+18) * cos(angle) );   
    
    // Redraw Time control buttons
    /*
@@ -484,13 +897,45 @@ void redrawMainView()
    }*/
    
    // Redraw current DateTime.
-   // TODO: works for Years only
+   String title, slider_title;
+   switch(curView)
+       {
+          case 0: // Day
+            // Time unit for day is hours
+            // Show Year, Month, Day, Hour
+            slider_title = views[curView].getCurDay() + " " + getMonthOfYear(views[curView].getCurMonth()) + ", " + views[curView].getCurYear() ;
+           title = views[curView].getCurDay() + " " + getMonthOfYear(views[curView].getCurMonth()) + ", " + views[curView].getCurYear() + " " + formatHourDisplay(views[curView].getCurHour()); 
+           setTitle(title);
+           
+            break;
+          
+          case 2: // Year
+            // Show Year, Month 
+            slider_title = ""+views[curView].getCurYear();
+           title =getMonthOfYear(views[curView].getCurMonth()) + ", " + views[curView].getCurYear(); 
+           setTitle( title);                           
+           
+            break;
+          
+          case 1: // Month  
+          default:
+            // Time units for month is days
+            // Show Day, Month, Year
+            int day = views[curView].getCurDay();      
+            if(day == 0)
+              day = 1;
+            slider_title = getMonthOfYear(views[curView].getCurMonth()) + ", " + views[curView].getCurYear();
+           title =day + " " + getMonthOfYear(views[curView].getCurMonth()) + ", " + views[curView].getCurYear() ;        
+           setTitle(title);
+           
    
-   int years_passed = time / 12;
-   int cur_year = g_yearStart + years_passed;
-   int cur_month = time % 12 +1; // Jan starts at 1
-   setTitle(getMonthOfYear(cur_month) + ", " + cur_year); 
-   
+       }
+   if(!isPaused)
+   {
+     //println("slider time: "+ views[curView].getCurSliderTime());
+     cp5.getController("Time").setValue(views[curView].getCurSliderTime());
+     cp5.getController("Time").setValueLabel(slider_title); 
+   }
    // Redraw all balls
    
     Iterator i = g_balls.entrySet().iterator();  // Get an iterator
@@ -502,6 +947,184 @@ void redrawMainView()
     }
 }
 
+
+
+boolean isLeapYear(int year)
+{
+  return !(year % 4 == 0);
+}
+
+int getNumDaysInMonth(int month, int year)
+{
+   switch(month)
+         {
+            case 1: // Jan
+            case 3: 
+            case 5:
+            case 7:
+            case 8: 
+            case 10:
+            case 12:
+              return 31;
+                    
+            case 4:
+            case 6:
+            case 9:
+            case 11:
+              return 30;
+            case 2:
+            if(isLeapYear(year))
+            {
+              return 29;            
+            }
+            else
+            {
+              return 28;                        
+            }
+  
+               
+            default:
+              return 0;
+               
+         } 
+}
+
+int[] getSliderDatetime(int time)
+{
+  
+  int this_time = time-1;
+  
+  Email e1 = g_emails.get(0);
+  int y1 = e1.getYear();
+  int m1 = e1.getMonth();
+  int d1 = e1.getDay();
+  
+ 
+  int[] result = new int[3]; // 0: day, 1: month, 2: year
+  switch(curView)
+  {
+     case 0: // day
+       
+       // cover first month
+       int first_month = getNumDaysInMonth(m1,y1) - d1;
+       if(this_time < first_month)
+       {
+          result[0] = d1+this_time;
+          result[1] = m1;
+          result[2] = y1; 
+       }
+       else
+       {
+         
+         result[0] = 0;
+          result[1] = m1+1;
+          result[2] = y1;
+         this_time -= first_month;
+        
+         while(this_time >0)
+         {
+          
+           int this_month =getNumDaysInMonth(result[1],result[2]); 
+           if(this_time < this_month)
+           {
+              result[0] = this_time;
+              this_time = 0;
+              
+           }
+           else
+           {
+              this_time -= this_month;
+             result[1] += 1;
+            if(result[1] > 12)
+           {
+              result[1] -= 12;
+              result[2] += 1;
+           } 
+           }
+         }  
+       }
+       
+       break;
+     case 1: // month
+       result[2] = y1 + this_time/12;
+       result[0] = 0;
+       result[1]= m1 + this_time % 12;
+       if(result[1] > 12)
+       {
+          result[2] += 1;
+          result[1] -= 12; 
+       }
+       break;
+     case 2: // year
+       result[2] = y1 + this_time;
+       result[0] = 0;
+       result[1]= 0;
+       break;
+  }
+  return result;
+}
+
+void setTotalTimeForViews()
+{
+  // sets total time units based on curView and g_emails, up to day accuracy for all views 
+  Email e1 = g_emails.get(0);
+  Email e2 = g_emails.get(g_emails.size()-1);
+  int total_time = 0;
+  int y1 = e1.getYear();
+  int y2 = e2.getYear();
+  int m1 = e1.getYear();
+  int m2 = e2.getYear();
+  int d1 = e1.getYear();
+  int d2 = e2.getYear();
+  
+  
+  
+  // Day view: start on the day
+  // Add number of days in partial of y1 and y2
+  // Add number of days in between y1+1 and y2-1
+  // Add days from m1 to end of year
+  for (int i = m1; i <= 12; i++)
+  {
+      total_time += getNumDaysInMonth(m1, y1);
+  }
+  total_time -= d1; // minus of days already passed
+  
+  for (int i = 1; i <= m2; i++)
+  {
+      total_time += getNumDaysInMonth(i, y2);
+  }
+  total_time += d2; // add days not passed
+  
+  for(int i = y1+1; i<y2; i++)
+  {
+     if(isLeapYear(i))
+      total_time += 366;
+     else
+      total_time += 365; 
+  }
+  
+  views[0].setTotalSliderTime(total_time);
+  
+  // Month view: start on the month
+  total_time = (y2-y1)  * 12; 
+  views[1].setTotalSliderTime(total_time);
+  
+  // Year view: start on the year
+  total_time = y2-y1 ; 
+  views[2].setTotalSliderTime(total_time);
+  
+  
+}
+
+String formatHourDisplay(int i)
+{
+  if(i<0)
+    return "00:00";
+  if(i<10)
+    return "0"+i+":00";
+  else
+    return ""+i+":00";
+}
 String getMonthOfYear(int i)
 {
   switch(i)
@@ -531,7 +1154,7 @@ String getMonthOfYear(int i)
      case 12:
        return "December";
      default:
-     return "";  
+     return "January";  
   }  
 }
 void mouseClicked()
@@ -542,7 +1165,7 @@ void mouseClicked()
       
       // Check play
       if(mouseX>play_btnx && mouseX < play_btnx+58 && mouseY>play_btny && mouseY <play_btny+58){
-       println("The mouse is pressed and over the play button");
+       //println("The mouse is pressed and over the play button");
        isPaused = !isPaused;
       
        //do stuff 
@@ -550,7 +1173,7 @@ void mouseClicked()
       // Check each ball if it's clicked
       else 
       {
-        println("mouse clicked");
+       // println("mouse clicked");
          Iterator i = g_balls.entrySet().iterator();  // Get an iterator
         while (i.hasNext()) 
         {

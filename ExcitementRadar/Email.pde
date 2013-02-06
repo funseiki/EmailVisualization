@@ -1,6 +1,8 @@
 class Email
 {
   // same id means the email is in the same thread
+  // year, month, day starts at 1.
+  // hour starts at 0;
    int year, month, day, hour, thread_id, excitement_level;
    String sender, subject, body, datetime, keyword;
    
