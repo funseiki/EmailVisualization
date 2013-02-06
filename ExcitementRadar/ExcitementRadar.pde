@@ -360,6 +360,10 @@ void loadEmails()
         int year = emailResult.getYear();
         int hour = emailResult.getHour();
         String dateTime = emailResult.getDateTime();
+        if(year < 2001 || year > 2013 || day < 1 || day > 31 || month < 1 || month > 12)
+        {
+          continue;
+        }
         
         // CSV: thread_id, year, month, day, hour, excitement_level, sender, subject, body, datetime, keyword;
         Email e = new Email(index, year, month, day, hour, excitementLevel, from[0], subject, body, dateTime, "");
