@@ -342,7 +342,7 @@ void loadEmails()
   {  
      //Print out the name of files in the directory  
      //System.out.println(files[index].toString());  
-      println("loading emails: " + index); 
+      //println("loading emails: " + index); 
       try{
         EmailResult emailResult = new EmailResult(files[index].toString());
         if(emailResult == null)
@@ -359,29 +359,49 @@ void loadEmails()
         int month = emailResult.getMonth();
         int year = emailResult.getYear();
         int hour = emailResult.getHour();
-        if(year < earliestYear)
+        String dateTime = emailResult.getDateTime();
+        
+        // CSV: thread_id, year, month, day, hour, excitement_level, sender, subject, body, datetime, keyword;
+        Email e = new Email(index, year, month, day, hour, excitementLevel, from[0], subject, body, dateTime, "");
+        
+        // Sort the emails
+        int sortIndex;
+        for(sortIndex = g_emails.size()-1; sortIndex > -1; sortIndex--)
         {
-          earliestYear = year;
-          earliestMonth = month;
-        }
-        else if(year == earliestYear)
-        {
-          if(month < earliestMonth)
+          Email old = g_emails.get(sortIndex);
+          // if we're larger than the current largest, we can add this thing
+          if(year > old.getYear())
           {
-            earliestMonth = month;
+            break;
+          }
+          else if(year == old.getYear())
+          {
+            if(month > old.getMonth())  // Same year, check months
+            {
+              break;
+            }
+            else if(month == old.getMonth())
+            {
+              if(day > old.getDay())  // Same year and month, check day
+              {
+                break;
+              }
+            }
           }
         }
-        String dateTime = emailResult.getDateTime();
-        // CSV: thread_id, year, month, day, hour, excitement_level, sender, subject, body, datetime, keyword;
-        Email e = new Email(1, year, month, day, hour, excitementLevel, from[0], subject, body, dateTime, "");
-        g_emails.add(e);
+        g_emails.add(sortIndex+1,e);
+        if(sortIndex == -1)
+        {
+          println("Index of earliest: " + index + ", " + files[index].toString());
+          println("Earliest month/year: " + g_emails.get(0).getMonth() + ":" + g_emails.get(0).getYear());
+        }
     }
     catch(Exception e)
     {
-      println(e.toString());
+      ;//println(e.toString());
     }
-    println("Earliest month/year: " + earliestMonth + ":" + earliestYear);
   }
+  println("Earliest month/year: " + g_emails.get(0).getMonth() + ":" + g_emails.get(0).getYear());
 }
 void recreateSlider()
 {

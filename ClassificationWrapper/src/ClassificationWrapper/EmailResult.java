@@ -46,6 +46,7 @@ public class EmailResult
 		
 		MimeConfig m = new MimeConfig();
 		m.setMaxLineLen(Integer.MAX_VALUE);
+		m.setMaxHeaderLen(Integer.MAX_VALUE);
 		
 		MimeStreamParser parser = new MimeStreamParser(m);
 		parser.setContentHandler(handler);
@@ -184,8 +185,7 @@ public class EmailResult
 	public int getYear()
 	{
 		int year = handler.getDate().getYear() + 1900;
-		System.out.println("Getting year: " + year);
-		return handler.getDate().getYear() + 1900;
+		return year;
 	}
 	
 	public String getDateTime()
