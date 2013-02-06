@@ -44,7 +44,7 @@ int emailBackground;
 void setPalette()
 {
   // Background
- backgroundColor = color(200);
+ backgroundColor = color(0);
 
 // Border
  borderColor = color(#00EE00);
@@ -262,36 +262,6 @@ void setup() {
   // Load data into g_emails (assumed already sorted by time)
   // CSV: thread_id, year, month, day, hour, excitement_level, sender, subject, body, datetime, keyword;
    // Hardcode for now 
-   Email e1 = new Email(1, 2012, 1, 2, 3, 0, "Mary", "1 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
-   g_emails.add(e1);
-   Email e2 = new Email(2, 2012, 1, 2, 3, 0, "Mary", "2 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
-   g_emails.add(e2);
-   Email e3 = new Email(3, 2012, 4, 2, 3, 0, "Mary", "3 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
-   g_emails.add(e3);
-   Email e4 = new Email(1, 2012, 5, 2, 3, 0, "Mary", "4 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
-   g_emails.add(e4);
-   Email e5 = new Email(2, 2012, 6, 2, 3, 2, "Mary", "5 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
-   g_emails.add(e5);
-   Email e6 = new Email(3, 2012, 7, 2, 3, 2, "Mary", "6 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
-   g_emails.add(e6);
-   Email e7 = new Email(3, 2012, 8, 2, 3, 2, "Mary", "7 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
-   g_emails.add(e7);
-   Email e8 = new Email(3, 2012, 9, 2, 3, 2, "Mary", "8 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
-   g_emails.add(e8);
-   Email e9 = new Email(3, 2012, 10, 2, 3, 2, "Mary", "9 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
-   g_emails.add(e9);
-   Email e10 = new Email(3, 2012, 11, 2, 3, 2, "Mary", "10 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
-   g_emails.add(e10);
-   Email e11 = new Email(3, 2012, 12, 2, 3, 2, "Mary", "11 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
-   g_emails.add(e11);
-   Email e12 = new Email(4, 2013, 1, 2, 3, 2, "Mary", "12 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
-   g_emails.add(e12);
-   Email e13 = new Email(3, 2013, 1, 2, 3, 2, "Mary", "13 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
-   g_emails.add(e13);
-   Email e14 = new Email(1, 2013, 1, 2, 3, 2, "Mary", "14 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
-   g_emails.add(e14);
-   Email e15 = new Email(1, 2013, 2, 2, 3, 2, "Mary", "15 Giving a lamb shower", "great body", "02-02-2012", "Ooops!");
-   g_emails.add(e15);
    
    g_yearStart = g_emails.get(0).getYear();
    g_monthStart = g_emails.get(0).getMonth() ;
@@ -300,8 +270,8 @@ void setup() {
    //int viewType, int currentYear, int currentMonth, int currentDay, int currentHour
    
    views = new View[3];
-  views[0] = new View("Daily View", 0, g_yearStart, 1, 1, -1); 
-  views[1] = new View("Monthly View", 1, g_yearStart, 1, 0, 0);  
+  views[0] = new View("Daily View", 0, g_yearStart, g_monthStart, g_dayStart, -1); 
+  views[1] = new View("Monthly View", 1, g_yearStart, g_monthStart, 0, 0);  
   views[2] = new View("Yearly View", 2, g_yearStart, 0, 1, 0);
   setTotalTimeForViews();
   curView = 1; // Default is monthly view.
@@ -360,39 +330,58 @@ void setup() {
 }
 void loadEmails()
 {
- //println(sketchPath(""));
- // hardcode for now
- File directory = new File(sketchPath("") + "/inbox/");  
-File[] files = directory.listFiles();  
+  //println(sketchPath(""));
+  // hardcode for now
+  File directory = new File(sketchPath("") + "/inbox/");  
+  File[] files = directory.listFiles();  
   //println("files: " + files.length);
+  int earliestYear = 2050;
+  int earliestMonth = 13;
   // why directory.listFiles can only hold up to 1253 lenght?
-for (int index = 0; index < files.length; index++)  
-{  
-   //Print out the name of files in the directory  
-   //System.out.println(files[index].toString());  
-    println("laoding emails: " + index); 
-    try{
-      
-   EmailResult emailResult = new EmailResult(files[index].toString());
-   if(emailResult == null)
-     return;
-     
-   String[] from = emailResult.getFrom();  // returns an array of senders
-   String[] to = emailResult.getTo();
-   String subject = emailResult.getSubject();
-   String body = emailResult.getBody();
-   Boolean isReply = emailResult.IsReply();
-   int excitementLevel = emailResult.getExcitementLevel();
-   Date d = emailResult.getDate();
-   
+  for (int index = 0; index < files.length; index++)  
+  {  
+     //Print out the name of files in the directory  
+     //System.out.println(files[index].toString());  
+      println("loading emails: " + index); 
+      try{
+        EmailResult emailResult = new EmailResult(files[index].toString());
+        if(emailResult == null)
+        {
+          return;
+        }
+        String[] from = emailResult.getFrom();  // returns an array of senders
+        String[] to = emailResult.getTo();
+        String subject = emailResult.getSubject();
+        String body = emailResult.getBody();
+        Boolean isReply = emailResult.IsReply();
+        int excitementLevel = emailResult.getExcitementLevel();
+        int day = emailResult.getDay();
+        int month = emailResult.getMonth();
+        int year = emailResult.getYear();
+        int hour = emailResult.getHour();
+        if(year < earliestYear)
+        {
+          earliestYear = year;
+          earliestMonth = month;
+        }
+        else if(year == earliestYear)
+        {
+          if(month < earliestMonth)
+          {
+            earliestMonth = month;
+          }
+        }
+        String dateTime = emailResult.getDateTime();
+        // CSV: thread_id, year, month, day, hour, excitement_level, sender, subject, body, datetime, keyword;
+        Email e = new Email(1, year, month, day, hour, excitementLevel, from[0], subject, body, dateTime, "");
+        g_emails.add(e);
     }
     catch(Exception e)
     {
-      ;
+      println(e.toString());
     }
-  
-} 
-
+    println("Earliest month/year: " + earliestMonth + ":" + earliestYear);
+  }
 }
 void recreateSlider()
 {
@@ -1168,10 +1157,10 @@ void setTotalTimeForViews()
   int total_time = 0;
   int y1 = e1.getYear();
   int y2 = e2.getYear();
-  int m1 = e1.getYear();
-  int m2 = e2.getYear();
-  int d1 = e1.getYear();
-  int d2 = e2.getYear();
+  int m1 = e1.getMonth();
+  int m2 = e2.getMonth();
+  int d1 = e1.getDay();
+  int d2 = e2.getDay();
   
   
   
