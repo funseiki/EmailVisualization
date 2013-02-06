@@ -58,7 +58,7 @@ public class EmailResult
 			System.out.println("Exception while parsing: " + e.toString());
 		}
 		// Handler is now ready to be queried
-		System.out.println("********Getting Sentences***********");
+		//System.out.println("********Getting Sentences***********");
 		String body = handler.getBody();
 		AssignPoints(body);
 	}
@@ -69,7 +69,7 @@ public class EmailResult
 		Set<Chunk> sentences = chunking.chunkSet();
 		if(sentences.size() < 1)
 		{
-			System.out.println("No sentences found");
+			//System.out.println("No sentences found");
 			return;
 		}
 		String slice = chunking.charSequence().toString();
@@ -96,8 +96,8 @@ public class EmailResult
 		    }
 		    current = messageSplit[0];
 	    	emailBody += current;
-	    	System.out.println("Current chunk: " + i);
-	    	System.out.println(current);
+	    	//System.out.println("Current chunk: " + i);
+	    	//System.out.println(current);
 	    	excitementLevel += checkForExcitement(current);
 		    if(messageSplit.length > 1)	// There was an older message included
 		    {
@@ -108,7 +108,7 @@ public class EmailResult
 
 		excitementLevel += checkForExcitement(getSubject());	// Also check the subject line
 		
-    	System.out.println("Current excitement level: " + excitementLevel);
+    	//System.out.println("Current excitement level: " + excitementLevel);
 	}
 	
 	private int checkForExcitement(String sentence)
@@ -179,6 +179,13 @@ public class EmailResult
 	public int getMonth()
 	{
 		return handler.getDate().getMonth() + 1;
+	}
+	
+	public int getYear()
+	{
+		int year = handler.getDate().getYear() + 1900;
+		System.out.println("Getting year: " + year);
+		return handler.getDate().getYear() + 1900;
 	}
 	
 	public String getDateTime()

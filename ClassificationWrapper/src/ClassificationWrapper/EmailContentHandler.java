@@ -60,13 +60,13 @@ public class EmailContentHandler implements ContentHandler {
 		String type = field.getName();
 		if(type.contentEquals("Date"))
 		{
-			System.out.println("This is the date before parse: " + field.getBody());
+			//System.out.println("This is the date before parse: " + field.getBody());
 			SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss");
 			dateFormat.setTimeZone(TimeZone.getTimeZone("PST"));
 			try
 			{
 				date = dateFormat.parse(field.getBody());
-				System.out.println("Date after parse: " + date.toString());
+				//System.out.println("Date after parse: " + date.toString());
 			}
 			catch(Exception e)
 			{
@@ -75,25 +75,17 @@ public class EmailContentHandler implements ContentHandler {
 		}
 		else if(type.contentEquals("From"))
 		{
-			System.out.println("From is this: " + field.getBody());
+			//System.out.println("From is this: " + field.getBody());
 			from = field.getBody().split(", ");
-			for(int i = 0; i < from.length; i++)
-			{
-				System.out.println("from value[" + i + "]: " + from[i]);
-			}
 		}
 		else if(type.contentEquals("To"))
 		{
-			System.out.println("To is this: " + field.getBody());
+			//System.out.println("To is this: " + field.getBody());
 			to = field.getBody().split(", ");
-			for(int i = 0; i < to.length; i++)
-			{
-				System.out.println("to value[" + i + "]: " + to[i]);
-			}
 		}
 		else if(type.contentEquals("Subject"))
 		{
-			System.out.println("Subject is this: " + field.getBody());
+			//System.out.println("Subject is this: " + field.getBody());
 			subject = field.getBody();
 			String[] sp =  subject.split(": ");
 			if(sp.length > 1 && sp[0].contentEquals("RE"))
@@ -101,7 +93,7 @@ public class EmailContentHandler implements ContentHandler {
 				subject = "";
 				String colonAdd = "";	// Add back any removed colons in the subject
 				isReply = true;
-				System.out.println("This is a reply");
+				//System.out.println("This is a reply");
 				for(int i = 0; i < sp.length; i++)
 				{
 					if(!sp[i].contentEquals("RE"))
@@ -111,7 +103,7 @@ public class EmailContentHandler implements ContentHandler {
 					}
 				}
 			}
-			System.out.println("Here is the subject: " + subject);
+			//System.out.println("Here is the subject: " + subject);
 		}
 	}
 
