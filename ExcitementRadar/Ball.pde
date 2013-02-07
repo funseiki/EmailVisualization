@@ -172,10 +172,10 @@ class Ball
      
      // Size of email thread
      int size = this.getSize();
-     int downsize = size / 10; // upgrade one size only every 100 char // TODO: testing
+     int downsize = size / 100; // upgrade one size only every 100 char // TODO: testing
      if(downsize <= 0)
        downsize = 1;
-     int this_diameter = downsize * 20; // TODO: testing
+     int this_diameter = downsize *5; // TODO: testing
      if (this_diameter > 100)
       this_diameter = 100; 
      
@@ -197,15 +197,19 @@ class Ball
      this.diameter = this_diameter;
      // show keyword continuously for now
      textAlign(CENTER, CENTER);
-     int textSize = downsize + 5; // min : 6
-     if(textSize > 32)
-       textSize = 32;
+     int textSize = downsize + 3; // min : 6
+     println("textsize: " + textSize);
+     if(textSize > 20)
+       textSize = 20;
+       //textSize = 14;
       fill(0);
      textFont(g_font, textSize);
      Email e = (Email) emails.get(emails.size() -1);
-     String keyword = e.getKeyword();
-     text(keyword, x, y, this_diameter);
-     
+     String keyword = e.getSender();
+     String[] name = keyword.split("@");
+     rectMode(CENTER);
+       text(name[0], x,y,this_radius-2,this_radius-2);
+     rectMode(CORNER);
       
   }
   int getX()
