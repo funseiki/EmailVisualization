@@ -5,6 +5,8 @@ class Ball
   float angle;
   int x,y,diameter,heat_level, excitement_level, thread_id; // heat_level: (cold) 1-10 (hot)
   boolean isSelected;
+  boolean isVisible;
+  
   Ball(float angle, int thread_id)
   {
     this.angle = angle;
@@ -16,6 +18,7 @@ class Ball
     this.y = 0; // used for mouseclicks only
     this.diameter = 0; // used for mouseclicks only
     this.isSelected = false;
+    this.isVisible = true;
   }
   void select()
   {
@@ -46,13 +49,18 @@ class Ball
       // decrease excitement
       this.excitement_level--;
       if(this.excitement_level < 0)
+      {
         this.excitement_level = 0;
+      }
       
       
       // decrement heat_level
       this.heat_level--;
-      if(this.heat_level < 1)
+      if(this.heat_level < 0)  // Nothing happened for the past few rounds, make it invisible
+      {
         this.heat_level = 1;
+        this.isVisible = false;
+      }
   }
   
   void fillColor()
@@ -107,7 +115,8 @@ class Ball
        //   fill(255, 115, 0);      
           break;   
        default:
-           ;
+           fill(39, 10, 100);
+           break;
     }
     colorMode(RGB, 255);
      
@@ -132,12 +141,16 @@ class Ball
   {
      // increase excitement (x,y)
      emails.add(e);
-     
+     this.isVisible = true;  // It's relevant again, show the email
      this.excitement_level += e.getExcitementLevel();
       if(this.excitement_level > 10)
         this.excitement_level = 10;
         
     // change heat
+    if(this.heat_level < 1)
+    {
+      this.heat_level = 1;
+    }
      this.heat_level += 3; // Increase by 3, but decrease by 1, so nett is 2. A nett 2 allows for more lag between emails
      if(this.heat_level >10)
       this.heat_level = 10; 
@@ -148,6 +161,11 @@ class Ball
   void drawMe()
   {
     
+    if(!this.isVisible)
+    {
+      
+      return;
+    }
     // Draws the ball on the radar (with x,y,angle, size, color)
     
      fillColor(); // sets the fill based on heat_level
@@ -201,5 +219,9 @@ class Ball
   int getDiameter()
   {
      return this.diameter; 
+  }
+  boolean getVisible()
+  {
+    return this.isVisible;
   }
 }
