@@ -365,13 +365,29 @@ void loadEmails()
         int year = emailResult.getYear();
         int hour = emailResult.getHour();
         String dateTime = emailResult.getDateTime();
+        
         if(year < 2001 || year > 2013 || day < 1 || day > 31 || month < 1 || month > 12)
         {
           continue;
         }
         
+        int thread_id = index;
+        
+        if(isReply)
+        {
+          for(int i = 0; i < g_emails.size(); i++)
+          {
+            if(subject.equals(g_emails.get(i).getSubject()))
+            {
+              thread_id = g_emails.get(i).getThreadId();
+              println("Got a reply");
+              break;
+            }
+          }
+        }
+        
         // CSV: thread_id, year, month, day, hour, excitement_level, sender, subject, body, datetime, keyword;
-        Email e = new Email(index, year, month, day, hour, excitementLevel, from[0], subject, body, dateTime, "");
+        Email e = new Email(thread_id, year, month, day, hour, excitementLevel, from[0], subject, body, dateTime, "");
         
         // Sort the emails
         int sortIndex;
