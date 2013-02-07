@@ -1344,21 +1344,13 @@ void updateSubMenu()
      
    // Show: Each email (Sender, Date, Subject, Body)
    String text = g_subMenuBall.getEmailThread();
-   String[] spaceFree = text.split("\n +");  // Make sure there are no lines with just spaces
-   text = "";
    
-   for(int i = 0; i < spaceFree.length; i++)
-   {
-     text += spaceFree[i] + "\n";
-   }
+   // Fix for single-line-full-of-spaces issue
+   text = text.replaceAll("\r", "\n");
+   text = text.replaceAll("\n +", "\n");
+   text = text.replaceAll(" +\n", "\n");
    
-   spaceFree = text.split(" +\n");  // Check if there are spaces preceeding a new line
-   text = "";
-   for(int k = 0; k < spaceFree.length; k++)
-   {
-     text += spaceFree[k] + "\n";
-   }
-    g_submenu.setText(text);
+   g_submenu.setText(text);
 }
 
 // Updates any aninimation that is running
