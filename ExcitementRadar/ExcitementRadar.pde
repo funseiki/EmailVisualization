@@ -335,10 +335,8 @@ void loadEmails()
   File directory = new File(sketchPath("") + "/inbox/");  
   File[] files = directory.listFiles();  
   //println("files: " + files.length);
-  int earliestYear = 2050;
-  int earliestMonth = 13;
   // why directory.listFiles can only hold up to 1253 lenght?
-  for (int index = 0; index < files.length; index++)  
+  for (int index = 0; index < 10; index++)  
   {  
      //Print out the name of files in the directory  
      //System.out.println(files[index].toString());  
@@ -1268,77 +1266,52 @@ String getMonthOfYear(int i)
 }
 void mouseClicked()
 {
- 
-   // Checks if play, back, forward button is pressed
-    
-      
-      // Check play
-      if(mouseX>play_btnx && mouseX < play_btnx+58 && mouseY>play_btny && mouseY <play_btny+58){
-       //println("The mouse is pressed and over the play button");
-       isPaused = !isPaused;
-      
-       //do stuff 
-      }
-      // Check each ball if it's clicked
-      else 
+  // Checks if play, back, forward button is pressed
+  println("Clicking mouse button");
+  // Check play
+  if(mouseX>play_btnx && mouseX < play_btnx+58 && mouseY>play_btny && mouseY <play_btny+58){
+    //println("The mouse is pressed and over the play button");
+    isPaused = !isPaused;
+    //do stuff
+  }
+  // Check each ball if it's clicked
+  else
+  {
+    Iterator i = g_balls.entrySet().iterator();  // Get an iterator
+    while (i.hasNext())
+    {
+      println("mouse clicked 2");
+      Map.Entry me = (Map.Entry)i.next();
+      Ball b = (Ball) me.getValue();
+      if(b.getVisible())
       {
-       // println("mouse clicked");
-         Iterator i = g_balls.entrySet().iterator();  // Get an iterator
-        while (i.hasNext()) 
+        int b_x = b.getX();
+        int b_y = b.getY();
+        int b_radius = b.getDiameter() / 2 - 3; // Force users to click more to the center for more accuracy
+        if(mouseX>b_x - b_radius && mouseX < b_x + b_radius && mouseY>b_y - b_radius && mouseY < b_y + b_radius)
         {
-          Map.Entry me = (Map.Entry)i.next();
-          Ball b = (Ball) me.getValue();
-          int b_x = b.getX();
-          int b_y = b.getY();
-          int b_radius = b.getDiameter() / 2 - 3; // Force users to click more to the center for more accuracy
-          if(mouseX>b_x - b_radius && mouseX < b_x + b_radius && mouseY>b_y - b_radius && mouseY < b_y + b_radius){
-            if(g_subMenuBall != null)
-              g_subMenuBall.deselect(); 
-            g_subMenuBall = b;
-            b.select();
-            break; // Only 1 ball is to be clicked each time
-             //do stuff 
+          if(g_subMenuBall != null)
+          {
+            g_subMenuBall.deselect();
           }
-        }   
+          g_subMenuBall = b;
+          b.select();
+          break; // Only 1 ball is to be clicked each time
+          //do stuff
+        }
       }
-      /*
-      else if(mouseX>back_btnx && mouseX < back_btnx+58 && mouseY>back_btny && mouseY <back_btny+58) // check back
-      {
-        isForward = false;
-      
-        //println("The mouse is pressed and over the  back button");
-      }
-      else if(mouseX>forward_btnx && mouseX < forward_btnx+58 && mouseY>forward_btny && mouseY <forward_btny+58) // check forward
-      {
-        isForward = true;
-      
-        //println("The mouse is pressed and over the forward button");
-      }*/
-      
- 
-      if(isPaused)
-   {
-      // Set play action
-      image(playImg, play_btnx, play_btny);
-   }
-   else
-   {
-       // Set pause action
-      image(pauseImg, play_btnx, play_btny);
-   }
-   /*
-   if(isForward)
-   {
-     // Set forward on, back off
-      image(backImg, back_btnx, back_btny);
-      image(forwardImgOn, forward_btnx, forward_btny);
-   }
-   else
-   {
-     // Set forward off, back on
-      image(backImgOn, back_btnx, back_btny);
-      image(forwardImg, forward_btnx, forward_btny);
-   }*/
+    }
+  }
+  if(isPaused)
+  {
+    // Set play action
+    image(playImg, play_btnx, play_btny);
+  }
+  else
+  {
+    // Set pause action
+    image(pauseImg, play_btnx, play_btny);
+  }
 }
 
 // Updates and redraws sub menu
