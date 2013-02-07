@@ -73,7 +73,8 @@ Textarea g_submenu;
 
 
 int g_yearStart, g_monthStart, g_dayStart, g_hourStart, curEmailPtr; // points to current email in arraylist for efficiency
-
+int g_totalExcitement;
+ArrayList g_totalExcitementLevels;
 // State Configurations
 boolean isPaused; // State control (whether it's paused or not)
 boolean isForward; // State control (whether the time moves forward or backwards) // Let's not implement this cos it's troublesome
@@ -97,7 +98,8 @@ void setup() {
   isPaused = true;
   isForward = true;
   isSubmenuOpen = true;
-  
+  g_totalExcitement = 0;
+  g_totalExcitementLevels = new ArrayList();
   angle_count = 0;
   
   // Configure XY Defaults
@@ -129,7 +131,7 @@ void setup() {
   cp5 = new ControlP5(this);
   g_submenu = cp5.addTextarea("txt")
                   .setPosition(770,120)
-                  .setSize(360,560)
+                  .setSize(360,360)
                   .setFont(createFont("arial",12))
                   .setLineHeight(14)
                   .setColor(color(borderColor))
@@ -188,6 +190,8 @@ void setup() {
       cp5.getController("Monthly_View").setColorCaptionLabel(#f5f5f5);
     cp5.getController("Yearly_View").setColorCaptionLabel(#f5f5f5);  
     recreateSlider();
+    g_totalExcitementLevels = new ArrayList();
+    g_totalExcitement = 0; 
         break;
       }
     }
@@ -203,7 +207,8 @@ void setup() {
     cp5.getController("Yearly_View").setColorCaptionLabel(#f5f5f5);
     // update slider range 
     recreateSlider();
-    
+    g_totalExcitementLevels = new ArrayList();
+    g_totalExcitement = 0; 
         break;
       }
     }
@@ -218,6 +223,8 @@ void setup() {
       cp5.getController("Monthly_View").setColorCaptionLabel(#f5f5f5);
     cp5.getController("Yearly_View").setColorCaptionLabel(#00EE00); 
    recreateSlider();
+   g_totalExcitementLevels = new ArrayList();
+   g_totalExcitement = 0; 
         break;
       }
     }
@@ -548,7 +555,7 @@ void setBackground()
   stroke(borderColor);
   strokeWeight(3);
   fill(emailBackground);
-  rect(sub_rectx,sub_recty,400,600, 7);
+  rect(sub_rectx,sub_recty,400,400, 7);
   
   // Draw visualization title
   fill(borderColor);
@@ -566,6 +573,8 @@ void updateDefaultChanges()
     // Update time
     for (int i = 0; i < views.length; i++)
       views[i].updateTime();
+    
+    
     //views[curView].updateTime();
     
    // Update main view
@@ -579,6 +588,12 @@ void updateDefaultChanges()
        {
            doUpdate = false;
        }
+       else
+       {
+        // Update total excitement level
+         updateTotalExcitement();
+        
+       }
        break;
       
       case 1: // month : update twice a month
@@ -586,9 +601,20 @@ void updateDefaultChanges()
        {
            doUpdate = false;
        }
+       if(views[1].getCurDay() == 1)
+       {
+        // Update total excitement level
+       updateTotalExcitement(); 
+       
+       }
         break;
       case 2: // year: updates every month
+      if(views[2].getCurMonth() == 1)
+       {
+        // Update total excitement level
+       updateTotalExcitement();
       
+       }
       
         break;
        
@@ -608,6 +634,62 @@ void updateDefaultChanges()
      
 }
 
+void updateTotalExcitement()
+{
+  g_totalExcitementLevels.add(g_totalExcitement);
+  g_totalExcitement = 0; 
+    
+}
+void drawTotalExcitement()
+{
+  if(g_totalExcitementLevels.size() == 0)
+    return;
+  int start = (Integer) g_totalExcitementLevels.get(0);
+  int baselineX = 750;
+  int baselineY =720;
+  int displacement = 400/views[curView].getTotalSliderTime() + 400%views[curView].getTotalSliderTime();
+  if(displacement >= 400)
+    displacement = 1;
+  int cur_displacement = 0;
+  for(int i = 1; i < g_totalExcitementLevels.size(); i++)
+  {
+    int second = (Integer)g_totalExcitementLevels.get(i);
+      // connect first to second
+      int x1 = baselineX + cur_displacement;
+      int x2 = x1 + displacement;
+      
+       int start_t=1, second_t=1; 
+      if(curView == 0)
+      {
+       start_t = start*5;
+      second_t = second*5;  
+      }
+      else if(curView == 1)
+      {
+        start_t = start/10;
+      second_t = second/10; 
+      }
+      else if(curView == 2)
+      {
+        start_t = start/100;
+      second_t = second/100; 
+      }
+      if(start_t > 200)
+        start_t = 200;
+      if(second_t > 200)
+        second_t = 200;
+     
+      int y1 = baselineY - start_t;
+      int y2 = baselineY - second_t;
+      
+        
+      line(x1,y1,x2,y2);
+      cur_displacement += displacement;
+      start = second;
+          
+  }
+  
+}
 // Updates backend with new information based on current time
 void updateNewInfo()
 {
@@ -709,6 +791,7 @@ ArrayList getNewEmails()
    
    int failsafe = 0; // just in case we get into an endless loop for some reason
    // Assume we dont have 1200 emails each time period
+  
    while(failsafe < 1200)
    {
      //println("curEmailPtr: " + curEmailPtr + " g_emails: " + g_emails.size());
@@ -720,6 +803,7 @@ ArrayList getNewEmails()
       {
          return result;
       }
+      g_totalExcitement += e.getExcitementLevel(); 
        println("Adding email");
         result.add(e);
         curEmailPtr++;
@@ -848,7 +932,8 @@ void reset()
   
   angle_count = 0;
 
-   
+   g_totalExcitement = 0;
+   g_totalExcitementLevels = new ArrayList();
   g_balls = new HashMap();
   g_newEmails = new ArrayList<Email>();
   g_subMenuBall = null;
@@ -1046,6 +1131,9 @@ void redrawMainView()
       Ball b = (Ball)me.getValue();
       b.drawMe();  
     }
+    
+    // Redraw Chart
+    drawTotalExcitement();
 }
 
 
@@ -1092,7 +1180,7 @@ int getNumDaysInMonth(int month, int year)
 
 int[] getSliderDatetime(int time)
 {
-  
+  println(time);
   int this_time = time-1;
   
   Email e1 = g_emails.get(0);
@@ -1207,11 +1295,15 @@ void setTotalTimeForViews()
   views[0].setTotalSliderTime(total_time);
   
   // Month view: start on the month
-  total_time = (y2-y1)  * 12; 
+  total_time = (y2-y1)  * 12 + (12 - m1) + m2; 
+  //println("total month slider: " + total_time);
   views[1].setTotalSliderTime(total_time);
   
   // Year view: start on the year
   total_time = y2-y1 ; 
+  //println("total year slider: " + total_time);
+  if(total_time == 0)
+    total_time = 1;
   views[2].setTotalSliderTime(total_time);
   
   
