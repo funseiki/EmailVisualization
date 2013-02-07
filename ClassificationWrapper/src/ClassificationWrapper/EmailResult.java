@@ -192,7 +192,8 @@ public class EmailResult
 	{
 		String s ="";
 		Date d = handler.getDate();
-		s += (getHour() % 12) + ":" + d.getMinutes() + ":" + d.getSeconds();
+		s = d.toGMTString();
+		//s = String.format("%02d:%02d:%02d", getHour()%12,d.getMinutes(),d.getSeconds());
 		return s;
 	}
 	
