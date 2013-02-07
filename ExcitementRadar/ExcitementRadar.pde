@@ -1350,6 +1350,68 @@ String getMonthOfYear(int i)
      return "January";  
   }  
 }
+
+void selectNextBall()
+{
+  
+}
+
+void keyPressed()
+{
+  if(key == CODED)
+  {
+    if(g_balls == null)
+      return;
+    if(keyCode == UP)
+    {
+        // Get an iterator
+      boolean found = false;
+      Ball b = null;
+      Ball head = null;
+      int i = 0;
+      for(Iterator it = g_balls.entrySet().iterator(); it.hasNext();)
+      {
+        Map.Entry me = (Map.Entry)it.next();
+        b = (Ball)me.getValue();
+        if(b.getVisible())
+        {
+          if(i == 0)
+          {
+            head = b;
+          }
+          if(!isSubmenuOpen)
+          {
+            break;
+          }
+          else
+          {
+            if(found)
+            {
+              break;
+            }
+            else if(b == g_subMenuBall)
+            {
+              found = true;
+            }
+          }
+          i++;
+        }
+      }
+      if(b == g_subMenuBall)
+      {
+        b = head;
+      }
+      if(b != null)
+      {
+        closeSubmenu();
+        g_subMenuBall = b;
+        b.select();
+        openSubmenu();
+      }
+    }
+  }
+}
+
 void mouseClicked()
 {
   
@@ -1433,6 +1495,11 @@ void updateSubMenu()
    // Redraw current sub menu
    if (g_subMenuBall == null || !isSubmenuOpen)
      return;
+   if (!g_subMenuBall.getVisible())
+   {
+     closeSubmenu();
+     return;
+   }
      
    // Show: Each email (Sender, Date, Subject, Body)
    String text = g_subMenuBall.getEmailThread();
