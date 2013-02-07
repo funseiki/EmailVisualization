@@ -486,7 +486,6 @@ void draw() {
   // Set static items
   setBackground();
   
-  
   if(!isPaused)
   {
      angle_count++; 
@@ -496,7 +495,6 @@ void draw() {
   // Update only two times per second, ie, if frame is 30 or 60...
   boolean doUpdate;
   doUpdate = (angle_count % updateSpeed) == 0;
-  
   if(doUpdate)
   {
       updateAnimation();
@@ -531,10 +529,6 @@ void draw() {
          updateSubMenu(); 
       }
   }
-  
-  
-  
-   
 }
 
 void setBackground()
@@ -1266,6 +1260,7 @@ String getMonthOfYear(int i)
 }
 void mouseClicked()
 {
+  
   // Checks if play, back, forward button is pressed
   println("Clicking mouse button");
   // Check play
@@ -1274,13 +1269,12 @@ void mouseClicked()
     isPaused = !isPaused;
     //do stuff
   }
-  // Check each ball if it's clicked
-  else
+  else // Check each ball if it's clicked
   {
     Iterator i = g_balls.entrySet().iterator();  // Get an iterator
+    Boolean foundBall = false;
     while (i.hasNext())
     {
-      println("mouse clicked 2");
       Map.Entry me = (Map.Entry)i.next();
       Ball b = (Ball) me.getValue();
       if(b.getVisible())
@@ -1296,11 +1290,19 @@ void mouseClicked()
           }
           g_subMenuBall = b;
           b.select();
+          openSubmenu();
+          foundBall = true;
           break; // Only 1 ball is to be clicked each time
           //do stuff
         }
       }
     }
+    // Clear the submenu if we click out
+    if(!foundBall)
+    {
+      closeSubmenu();
+    }
+    
   }
   if(isPaused)
   {
@@ -1312,25 +1314,50 @@ void mouseClicked()
     // Set pause action
     image(pauseImg, play_btnx, play_btny);
   }
+  
+}
+
+void openSubmenu()
+{
+  isSubmenuOpen = true;
+}
+void closeSubmenu()
+{
+  if(g_submenu != null)
+  {
+    g_submenu.setText("");
+  }
+  if(g_subMenuBall != null)
+  {
+    g_subMenuBall.deselect();
+    g_subMenuBall = null;
+  }
+  isSubmenuOpen = false;
 }
 
 // Updates and redraws sub menu
 void updateSubMenu()
 {
-  //println("update submenu");
    // Redraw current sub menu
-   if (g_subMenuBall == null)
+   if (g_subMenuBall == null || !isSubmenuOpen)
      return;
-  //println("update submenu -- got ball"); 
-   // TODO: Igoring excitement meter for now and other stats for now.
+     
    // Show: Each email (Sender, Date, Subject, Body)
    String text = g_subMenuBall.getEmailThread();
+   String[] spaceFree = text.split("\n +");  // Make sure there are no lines with just spaces
+   text = "";
    
-    //fill(#00EE00);
-    //textFont(g_font, 12);
-    //textAlign(LEFT);
-    
-    //text(text, 770,120, 360, 560);
+   for(int i = 0; i < spaceFree.length; i++)
+   {
+     text += spaceFree[i] + "\n";
+   }
+   
+   spaceFree = text.split(" +\n");  // Check if there are spaces preceeding a new line
+   text = "";
+   for(int k = 0; k < spaceFree.length; k++)
+   {
+     text += spaceFree[k] + "\n";
+   }
     g_submenu.setText(text);
 }
 
