@@ -336,7 +336,7 @@ void loadEmails()
   File[] files = directory.listFiles();  
   //println("files: " + files.length);
   // why directory.listFiles can only hold up to 1253 lenght?
-  for (int index = 0; index < 10; index++)  
+  for (int index = 0; index < files.length; index++)  
   {  
      //Print out the name of files in the directory  
      //System.out.println(files[index].toString());  
@@ -1346,7 +1346,9 @@ void updateSubMenu()
    String text = g_subMenuBall.getEmailThread();
    
    // Fix for single-line-full-of-spaces issue
-   text = text.replaceAll("\r", "\n");
+   text = text.replaceAll("\r", "");
+   //text = text.replaceAll("  ", " ");
+   text = text.replaceAll("\n\n", "\n");
    text = text.replaceAll("\n +", "\n");
    text = text.replaceAll(" +\n", "\n");
    

@@ -208,6 +208,8 @@ class Ball
      String keyword = e.getSender();
      String[] name = keyword.split("@");
      rectMode(CENTER);
+     if(name[0].length() > 8)
+       name[0] = name[0].substring(0,8);
        text(name[0], x,y,this_radius-2,this_radius-2);
      rectMode(CORNER);
       
